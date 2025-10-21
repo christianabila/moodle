@@ -413,19 +413,19 @@ class completion_info {
     /**
      * Get course completion criteria
      *
-     * @param int $criteriatype Specific criteria type to return (optional)
+     * @param int|null $criteriatype Specific criteria type to return (optional)
+     * @return array
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public function get_criteria(?int $criteriatype = null): array {
-
-        // Fill cache if empty
+        // Fill cache if empty.
         if (!is_array($this->criteria)) {
             global $DB;
 
-            $params = array(
-                'course'    => $this->course->id
-            );
+            $params = ['course' => $this->course->id];
 
-            // Load criteria from database
+            // Load criteria from database.
             $records = $DB->get_records('course_completion_criteria', $params);
 
             // Order records so activities are in the same order as they appear on the course view page.
@@ -453,22 +453,21 @@ class completion_info {
                 });
             }
 
-            // Build array of criteria objects
-            $this->criteria = array();
+            // Build array of criteria objects.
+            $this->criteria = [];
             foreach ($records as $record) {
                 $this->criteria[$record->id] = completion_criteria::factory((array)$record);
             }
         }
 
-        // If after all criteria
+        // If after all criteria.
         if ($criteriatype === null) {
             return $this->criteria;
         }
 
-        // If we are only after a specific criteria type
-        $criteria = array();
+        // If we are only after a specific criteria type.
+        $criteria = [];
         foreach ($this->criteria as $criterion) {
-
             if ($criterion->criteriatype != $criteriatype) {
                 continue;
             }
