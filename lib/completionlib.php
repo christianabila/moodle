@@ -428,30 +428,32 @@ class completion_info {
             // Load criteria from database.
             $records = $DB->get_records('course_completion_criteria', $params);
 
-            // Order records so activities are in the same order as they appear on the course view page.
-            if ($records) {
-                $activitiesorder = array_keys(get_fast_modinfo($this->course)->get_cms());
+            if (empty($records)) {
+                return [];
+            }
 
-                // Remove disabled modules.
-                foreach ($records as $key => $record) {
-                    if ($record->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) {
-                        if (!in_array($record->moduleinstance, $activitiesorder)) {
-                            unset($records[$key]);
-                        }
+            // Order records so activities are in the same order as they appear on the course view page.
+            $activitiesorder = array_keys(get_fast_modinfo($this->course)->get_cms());
+
+            // Remove disabled modules.
+            foreach ($records as $key => $record) {
+                if ($record->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) {
+                    if (!in_array($record->moduleinstance, $activitiesorder)) {
+                        unset($records[$key]);
                     }
                 }
-
-                usort($records, function ($a, $b) use ($activitiesorder) {
-                    $aidx = ($a->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) ?
-                        array_search($a->moduleinstance, $activitiesorder) : false;
-                    $bidx = ($b->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) ?
-                        array_search($b->moduleinstance, $activitiesorder) : false;
-                    if ($aidx === false || $bidx === false || $aidx == $bidx) {
-                        return 0;
-                    }
-                    return ($aidx < $bidx) ? -1 : 1;
-                });
             }
+
+            usort($records, function ($a, $b) use ($activitiesorder) {
+                $aidx = ($a->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) ?
+                    array_search($a->moduleinstance, $activitiesorder) : false;
+                $bidx = ($b->criteriatype == COMPLETION_CRITERIA_TYPE_ACTIVITY) ?
+                    array_search($b->moduleinstance, $activitiesorder) : false;
+                if ($aidx === false || $bidx === false || $aidx == $bidx) {
+                    return 0;
+                }
+                return ($aidx < $bidx) ? -1 : 1;
+            });
 
             // Build array of criteria objects.
             $this->criteria = [];
