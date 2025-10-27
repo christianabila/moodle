@@ -4154,6 +4154,7 @@ class restore_activity_grades_structure_step extends restore_structure_step {
         $data->idnumber     = $idnumber;
         $data->scaleid      = $this->get_mappingid('scale', $data->scaleid);
         $data->outcomeid    = $this->get_mappingid('outcome', $data->outcomeid);
+        $data->locktime     = $this->apply_date_offset($data->locktime);
 
         $gradeitem = new grade_item($data, false);
         $gradeitem->insert('restore');
