@@ -4129,9 +4129,11 @@ class restore_activity_grades_structure_step extends restore_structure_step {
                 'cmid' => $this->task->get_moduleid(),
             ];
 
+            $cmexists = $DB->record_exists_sql($sql, $params);
+            $gradeitemexists = $DB->record_exists('grade_items', ['courseid' => $courseid, 'idnumber' => $data->idnumber]);
             if (
-                !$DB->record_exists_sql($sql, $params)
-                && !$DB->record_exists('grade_items', ['courseid' => $courseid, 'idnumber' => $data->idnumber])
+                !$cmexists
+                && !$gradeitemexists
             ) {
                 $idnumber = $data->idnumber;
             }
