@@ -488,4 +488,51 @@ final class restore_stepslib_date_test extends \restore_date_testcase {
             "hidden of 0 should not be offset on restore."
         );
     }
+
+    /**
+     * Test that grade item locktime and hidden are rolled forward when restoring a course with a new start date.
+     *
+     * @covers \restore_activity_grades_structure_step::process_grade_item
+     * @covers \restore_step::apply_date_offset
+     * @throws \dml_exception
+     */
+    public function test_grade_item_locktime_and_hidden_date_restore(): void {
+        global $DB;
+        // Create a course with a specific start date and an assignment module.
+        [$course, $assign] = $this->create_course_and_module('assign');
+        // Fetch the grade item automatically created for the assignment.
+        $gradeitem = \grade_item::fetch([
+            'itemtype'     => 'mod',
+            'iteminstance' => $assign->id,
+            'itemmodule'   => 'assign',
+            'courseid'     => $course->id,
+        ]);
+        // Set locktime and hidden to timestamps relative to the course start date.
+        $locktime    = $this->startdate + DAYSECS;
+        $hiddenuntil = $this->startdate + (2 * DAYSECS);
+        $DB->set_field('grade_items', 'locktime', $locktime, ['id' => $gradeitem->id]);
+        $DB->set_field('grade_items', 'hidden', $hiddenuntil, ['id' => $gradeitem->id]);
+        // Back up and restore to a course with a new start date.
+        $newcourseid = $this->backup_and_restore($course);
+        // Locate the grade item in the restored course.
+        $assignid = $DB->get_field('assign', 'id', ['course' => $newcourseid]);
+        $newgradeitem = \grade_item::fetch([
+            'itemtype'     => 'mod',
+            'iteminstance' => $assignid,
+            'itemmodule'   => 'assign',
+            'courseid'     => $newcourseid,
+        ]);
+        // Both dates should have been rolled forward by the course date offset.
+        $diff = $this->get_diff();
+        $this->assertEquals(
+            $locktime + $diff,
+            $newgradeitem->locktime,
+            "locktime should be rolled forward on restore."
+        );
+        $this->assertEquals(
+            $hiddenuntil + $diff,
+            $newgradeitem->hidden,
+            "hidden (hidden-until timestamp) should be rolled forward on restore."
+        );
+    }
 }
