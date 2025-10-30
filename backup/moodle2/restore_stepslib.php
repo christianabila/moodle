@@ -4087,11 +4087,22 @@ class restore_activity_grades_structure_step extends restore_structure_step {
         return $paths;
     }
 
-    protected function process_grade_item($data) {
+    /**
+     * Process grade item
+     *
+     * @param array $data The grade item data
+     * @return void
+     * @throws base_step_exception
+     * @throws base_task_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     * @throws restore_step_exception
+     */
+    protected function process_grade_item(array $data): void {
         global $DB;
 
         $data = (object)($data);
-        $oldid       = $data->id;        // We'll need these later
+        $oldid       = $data->id;        // We'll need these later.
         $oldparentid = $data->categoryid;
         $courseid = $this->get_courseid();
 
@@ -4103,18 +4114,24 @@ class restore_activity_grades_structure_step extends restore_structure_step {
             // Potential problem: duplicates if same items are restored more than once. :-(
             // This needs to be fixed in some way (outcomes & activities with multiple items)
             // $data->idnumber     = get_coursemodule_from_instance($data->itemmodule, $data->iteminstance)->idnumber;
-            // In any case, verify always for uniqueness
+            // In any case, verify always for uniqueness.
             $sql = "SELECT cm.id
                       FROM {course_modules} cm
                      WHERE cm.course = :courseid AND
                            cm.idnumber = :idnumber AND
                            cm.id <> :cmid";
-            $params = array(
+            $params = [
                 'courseid' => $courseid,
                 'idnumber' => $data->idnumber,
-                'cmid' => $this->task->get_moduleid()
-            );
-            if (!$DB->record_exists_sql($sql, $params) && !$DB->record_exists('grade_items', array('courseid' => $courseid, 'idnumber' => $data->idnumber))) {
+                'cmid' => $this->task->get_moduleid(),
+            ];
+
+            $cmexists = $DB->record_exists_sql($sql, $params);
+            $gradeitemexists = $DB->record_exists('grade_items', ['courseid' => $courseid, 'idnumber' => $data->idnumber]);
+            if (
+                !$cmexists
+                && !$gradeitemexists
+            ) {
                 $idnumber = $data->idnumber;
             }
         }
@@ -4124,7 +4141,7 @@ class restore_activity_grades_structure_step extends restore_structure_step {
             // then it is a fair assumption that this is the correct grade category for the activity
             // and we should leave it in place, if not then unset it.
             // TODO MDL-34790 Gradebook does not import if target course has gradebook categories.
-            $conditions = array('id' => $data->categoryid, 'courseid' => $courseid);
+            $conditions = ['id' => $data->categoryid, 'courseid' => $courseid];
             if (!$this->task->is_samesite() || !$DB->record_exists('grade_categories', $conditions)) {
                 unset($data->categoryid);
             }
@@ -4140,13 +4157,18 @@ class restore_activity_grades_structure_step extends restore_structure_step {
         $gradeitem = new grade_item($data, false);
         $gradeitem->insert('restore');
 
-        //sortorder is automatically assigned when inserting. Re-instate the previous sortorder
+        // Sortorder is automatically assigned when inserting. Re-instate the previous sortorder.
         $gradeitem->sortorder = $data->sortorder;
         $gradeitem->update('restore');
 
         // Set mapping, saving the original category id into parentitemid
-        // gradebook restore (final task) will need it to reorganise items
-        $this->set_mapping('grade_item', $oldid, $gradeitem->id, false, null, $oldparentid);
+        // gradebook restore (final task) will need it to reorganise items.
+        $this->set_mapping(
+            itemname: 'grade_item',
+            oldid: $oldid,
+            newid: $gradeitem->id,
+            parentid: $oldparentid,
+        );
     }
 
     protected function process_grade_grade($data) {
