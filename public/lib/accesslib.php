@@ -107,6 +107,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\context\course;
+use core\context\system;
+use core\url;
+
 defined('MOODLE_INTERNAL') || die();
 
 /** No capability change */
@@ -2891,9 +2895,9 @@ function get_roles_used_in_context(context $context, $includeparents = true) {
 function get_user_roles_in_course(int $userid, int $courseid): string {
     global $CFG, $DB;
     if ($courseid == SITEID) {
-        $context = context_system::instance();
+        $context = system::instance();
     } else {
-        $context = context_course::instance($courseid);
+        $context = course::instance($courseid);
     }
     // If the current user can assign roles, then they can see all roles on the profile and participants page,
     // provided the roles are assigned to at least 1 user in the context. If not, only the policy-defined roles.
@@ -2934,7 +2938,7 @@ function get_user_roles_in_course(int $userid, int $courseid): string {
         $rolenames = [];
         foreach ($roles as $roleid => $unused) {
             if (isset($viewableroles[$roleid])) {
-                $url = new moodle_url('/user/index.php', ['contextid' => $context->id, 'roleid' => $roleid]);
+                $url = new url('/user/index.php', ['contextid' => $context->id, 'roleid' => $roleid]);
                 $rolenames[] = '<a href="' . $url . '">' . $viewableroles[$roleid] . '</a>';
             }
         }
@@ -3386,7 +3390,7 @@ function get_switchable_roles(context $context, $rolenamedisplay = ROLENAME_ALIA
 /**
  * Gets a list of roles that this user can view in a context
  *
- * @param context $context a context.
+ * @param \core\context $context a context.
  * @param int|null $userid id of user.
  * @param int $rolenamedisplay the type of role name to display. One of the
  *      ROLENAME_X constants. Default ROLENAME_ALIAS.
@@ -3394,7 +3398,7 @@ function get_switchable_roles(context $context, $rolenamedisplay = ROLENAME_ALIA
  * @throws coding_exception
  * @throws dml_exception
  */
-function get_viewable_roles(context $context, ?int $userid = null, int $rolenamedisplay = ROLENAME_ALIAS): array {
+function get_viewable_roles(\core\context $context, ?int $userid = null, int $rolenamedisplay = ROLENAME_ALIAS): array {
     global $USER, $DB;
 
     if ($userid == null) {
