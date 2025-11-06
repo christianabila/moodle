@@ -2884,6 +2884,9 @@ function get_roles_used_in_context(context $context, $includeparents = true) {
  * @param int $userid
  * @param int $courseid
  * @return string
+ * @throws dml_exception
+ * @throws coding_exception
+ * @throws \core\exception\moodle_exception
  */
 function get_user_roles_in_course($userid, $courseid) {
     global $CFG, $DB;
@@ -2903,8 +2906,8 @@ function get_user_roles_in_course($userid, $courseid) {
         return '';
     }
 
-    list($rallowed, $params) = $DB->get_in_or_equal($rolesinscope, SQL_PARAMS_NAMED, 'a');
-    list($contextlist, $cparams) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'p');
+    [$rallowed, $params] = $DB->get_in_or_equal($rolesinscope, SQL_PARAMS_NAMED, 'a');
+    [$contextlist, $cparams] = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'p');
     $params = array_merge($params, $cparams);
 
     if ($coursecontext = $context->get_course_context(false)) {
@@ -2928,7 +2931,7 @@ function get_user_roles_in_course($userid, $courseid) {
     if ($roles = $DB->get_records_sql($sql, $params)) {
         $viewableroles = get_viewable_roles($context, $userid);
 
-        $rolenames = array();
+        $rolenames = [];
         foreach ($roles as $roleid => $unused) {
             if (isset($viewableroles[$roleid])) {
                 $url = new moodle_url('/user/index.php', ['contextid' => $context->id, 'roleid' => $roleid]);
@@ -3388,6 +3391,8 @@ function get_switchable_roles(context $context, $rolenamedisplay = ROLENAME_ALIA
  * @param int $rolenamedisplay the type of role name to display. One of the
  *      ROLENAME_X constants. Default ROLENAME_ALIAS.
  * @return array an array $roleid => $rolename.
+ * @throws coding_exception
+ * @throws dml_exception
  */
 function get_viewable_roles(context $context, $userid = null, $rolenamedisplay = ROLENAME_ALIAS) {
     global $USER, $DB;
@@ -3396,7 +3401,7 @@ function get_viewable_roles(context $context, $userid = null, $rolenamedisplay =
         $userid = $USER->id;
     }
 
-    $params = array();
+    $params = [];
     $extrajoins = '';
     $extrawhere = '';
     if (!is_siteadmin()) {
@@ -3404,7 +3409,7 @@ function get_viewable_roles(context $context, $userid = null, $rolenamedisplay =
         // Others are subject to the additional constraint that the view role must be allowed by
         // 'role_allow_view' for some role they have assigned in this context or any parent.
         $contexts = $context->get_parent_context_ids(true);
-        list($insql, $inparams) = $DB->get_in_or_equal($contexts, SQL_PARAMS_NAMED);
+        [$insql, $inparams] = $DB->get_in_or_equal($contexts, SQL_PARAMS_NAMED);
 
         $extrajoins = "JOIN {role_allow_view} ras ON ras.allowview = r.id
                        JOIN {role_assignments} ra ON ra.roleid = ras.roleid";
