@@ -664,15 +664,15 @@ final class completionlib_test extends advanced_testcase {
         global $DB;
         $this->mock_setup();
 
-        $course = (object)array('id' => 13);
-        $cm = (object)array('id' => 42, 'course' => 13);
+        $course = (object) ['id' => 13];
+        $cm = (object) ['id' => 42, 'course' => 13];
         $c = new completion_info($course);
 
         // Check it works ok without data in session.
         /** @var $DB PHPUnit_Framework_MockObject_MockObject */
         $DB->expects($this->once())
             ->method('delete_records')
-            ->with('course_modules_completion', array('coursemoduleid' => 42))
+            ->with('course_modules_completion', ['coursemoduleid' => 42])
             ->will($this->returnValue(true));
         $c->delete_all_state($cm);
     }
