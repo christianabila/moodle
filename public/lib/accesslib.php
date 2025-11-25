@@ -2888,7 +2888,7 @@ function get_roles_used_in_context(context $context, $includeparents = true) {
  * @throws coding_exception
  * @throws \core\exception\moodle_exception
  */
-function get_user_roles_in_course($userid, $courseid) {
+function get_user_roles_in_course(int $userid, int $courseid): string {
     global $CFG, $DB;
     if ($courseid == SITEID) {
         $context = context_system::instance();
@@ -3387,14 +3387,14 @@ function get_switchable_roles(context $context, $rolenamedisplay = ROLENAME_ALIA
  * Gets a list of roles that this user can view in a context
  *
  * @param context $context a context.
- * @param int $userid id of user.
+ * @param int|null $userid id of user.
  * @param int $rolenamedisplay the type of role name to display. One of the
  *      ROLENAME_X constants. Default ROLENAME_ALIAS.
  * @return array an array $roleid => $rolename.
  * @throws coding_exception
  * @throws dml_exception
  */
-function get_viewable_roles(context $context, $userid = null, $rolenamedisplay = ROLENAME_ALIAS) {
+function get_viewable_roles(context $context, ?int $userid = null, int $rolenamedisplay = ROLENAME_ALIAS): array {
     global $USER, $DB;
 
     if ($userid == null) {
