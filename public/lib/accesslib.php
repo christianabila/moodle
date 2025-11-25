@@ -3415,8 +3415,8 @@ function get_viewable_roles(\core\context $context, ?int $userid = null, int $ro
         $contexts = $context->get_parent_context_ids(true);
         [$insql, $inparams] = $DB->get_in_or_equal($contexts, SQL_PARAMS_NAMED);
 
-        $extrajoins = "JOIN {role_allow_view} ras ON ras.allowview = r.id
-                       JOIN {role_assignments} ra ON ra.roleid = ras.roleid";
+        $extrajoins = "JOIN {role_allow_view} rav ON rav.allowview = r.id
+                       JOIN {role_assignments} ra ON ra.roleid = rav.roleid";
         $extrawhere = "WHERE ra.userid = :userid AND ra.contextid $insql";
 
         $params += $inparams;
