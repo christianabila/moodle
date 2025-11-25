@@ -47,15 +47,19 @@
         "editlabel" : "New name for this",
         "type" : "text",
         "options" : "",
-        "linkeverything": 0
+        "linkeverything": 0,
+        "isformatweeks": true
     }
 }}
 {{#component}}
 <span class="inplaceeditable inplaceeditable-{{type}}" data-inplaceeditable="1" data-component="{{component}}" data-itemtype="{{itemtype}}" data-itemid="{{itemid}}"
     data-value="{{value}}" data-editlabel="{{editlabel}}" data-type="{{type}}" data-options="{{options}}">
-        {{^ linkeverything }}{{{displayvalue}}}{{/ linkeverything }}
+    {{^ linkeverything }}{{{displayvalue}}}{{/ linkeverything }}
         <a href="#" class="quickeditlink aalink" data-inplaceeditablelink="1" title="{{edithint}}">
-            {{# linkeverything }}{{{displayvalue}}}{{/ linkeverything }}
+            {{# linkeverything }}
+                {{#isformatweeks}}<span data-section-name-for="{{itemid}}">{{{displayvalue}}}</span>{{/isformatweeks}}
+                {{^isformatweeks}}{{{displayvalue}}}{{/isformatweeks}}
+            {{/ linkeverything }}
             <span class="quickediticon visibleifjs icon-size-3">
                 {{#editicon}}{{#pix}}{{key}}, {{component}}, {{{title}}}{{/pix}}{{/editicon}}
             </span>
@@ -68,4 +72,3 @@
 {{^component}}
     {{{displayvalue}}}
 {{/component}}
-

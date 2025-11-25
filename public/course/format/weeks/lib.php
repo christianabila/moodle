@@ -23,6 +23,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\context\course;
+use core\lang_string;
+use core\output\html_writer;
+use core\output\inplace_editable;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 require_once($CFG->dirroot. '/course/lib.php');
@@ -615,6 +620,65 @@ class format_weeks extends core_courseformat\base {
      */
     public function get_required_jsfiles(): array {
         return [];
+    }
+
+    /**
+     * Prepares the templateable object to display section name
+     *
+     * @param section_info|stdClass $section
+     * @param bool $linkifneeded
+     * @param bool $editable
+     * @param null|lang_string|string $edithint
+     * @param null|lang_string|string $editlabel
+     * @return inplace_editable
+     * @throws coding_exception
+     */
+    public function inplace_editable_render_section_name(
+        $section,
+        $linkifneeded = true,
+        $editable = null,
+        $edithint = null,
+        $editlabel = null
+    ) {
+        global $USER, $CFG;
+        require_once($CFG->dirroot . '/course/lib.php');
+
+        if ($editable === null) {
+            $editable = !empty($USER->editing)
+                        && has_capability('moodle/course:update', course::instance($section->course));
+        }
+
+        $displayvalue = $title = get_section_name($section->course, $section);
+        if ($linkifneeded) {
+            // Display link under the section name if the course format setting is to display one section per page.
+            $url = course_get_url($section->course, $section->section, ['navigation' => true]);
+            if ($url) {
+                $displayvalue = html_writer::link($url, $title);
+            }
+            $itemtype = 'sectionname';
+        } else {
+            // If $linkifneeded==false, we never display the link (this is used when rendering the section header).
+            // Itemtype 'sectionnamenl' (nl=no link) will tell the callback that link should not be rendered -
+            // there is no other way callback can know where we display the section name.
+            $itemtype = 'sectionnamenl';
+        }
+        if (empty($edithint)) {
+            $edithint = new lang_string('editsectionname');
+        }
+        if (empty($editlabel)) {
+            $editlabel = new lang_string('newsectionname', '', $title);
+        }
+
+        return new \format_weeks\output\inplace_editable(
+            'format_' . $this->format,
+            $itemtype,
+            $section->id,
+            $editable,
+            $displayvalue,
+            $section->name,
+            $edithint,
+            $editlabel,
+        );
     }
 }
 
