@@ -64,7 +64,7 @@ abstract class restore_step extends base_step {
 
         // Empties don't offset - zeros (int and string), false and nulls return original value.
         if (empty($value)) {
-            return $value;
+            return 0;
         }
 
         static $cache = [];
