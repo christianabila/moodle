@@ -181,10 +181,16 @@ abstract class qtype_gapselect_question_base extends question_graded_automatical
         $accum = 0;
 
         foreach ($this->places as $placegroup) {
-            $accum += 1 / count($this->choices[$placegroup]);
+            if (count($this->choices[$placegroup]) > 0) {
+                $accum += 1 / count($this->choices[$placegroup]);
+            }
         }
 
-        return $accum / count($this->places);
+        if (count($this->places) > 0) {
+            return $accum / count($this->places);
+        }
+
+        return 0;
     }
 
     public function clear_wrong_from_response(array $response) {
