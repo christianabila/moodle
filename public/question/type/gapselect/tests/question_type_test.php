@@ -102,6 +102,21 @@ final class question_type_test extends \question_testcase {
         $this->assertEquals($expected, $q);
     }
 
+    /**
+     * Whitespaces in placeholders are removed for further processing.
+     * @return void
+     */
+    public function test_initialise_question_instance_whitespaces_in_placeholders(): void {
+        $qdata = \test_question_maker::get_question_data('gapselect', 'whitespace_in_placeholders');
+
+        $expected = \test_question_maker::make_question('gapselect', 'whitespace_in_placeholders');
+        $expected->stamp = $qdata->stamp;
+
+        $q = $this->qtype->make_question($qdata);
+
+        $this->assertEquals($expected, $q);
+    }
+
     public function test_get_random_guess_score(): void {
         $q = $this->get_test_question_data();
         $this->assertEqualsWithDelta(0.5, $this->qtype->get_random_guess_score($q), 0.0000001);
