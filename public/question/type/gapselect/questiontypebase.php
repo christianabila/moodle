@@ -180,17 +180,21 @@ abstract class qtype_gapselect_base extends question_type {
         $question->textfragments = array();
         $question->rightchoices = array();
         // Break up the question text, and store the fragments, places and right answers.
-
-        $bits = preg_split('/\[\[(\d+)]]/', $question->questiontext,
-                -1, PREG_SPLIT_DELIM_CAPTURE);
+        $bits = preg_split(
+            '/\[\[(\d+\s*)]]/',
+            $questiondata->questiontext,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE,
+        );
         $question->textfragments[0] = array_shift($bits);
         $i = 1;
 
         while (!empty($bits)) {
             $choice = array_shift($bits);
 
-            list($group, $choiceindex) = $choiceindexmap[$choice];
-            $question->places[$i] = $group;
+            [$group, $choiceindex] = $choiceindexmap[trim($choice)];
+            // Remove any whitespace characters from previously incorrectly entered placeholders.
+            $question->places[$i] = preg_replace('/\s+/', '', $group);
             $question->rightchoices[$i] = $choiceindex;
 
             $question->textfragments[$i] = array_shift($bits);

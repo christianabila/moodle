@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
 class qtype_gapselect_test_helper extends question_test_helper {
 
     public function get_test_questions() {
-        return array('fox', 'maths', 'currency', 'multilang', 'missingchoiceno');
+        return ['fox', 'maths', 'currency', 'multilang', 'missingchoiceno', 'whitespace_in_placeholders'];
     }
 
     /**
@@ -85,6 +85,57 @@ class qtype_gapselect_test_helper extends question_test_helper {
             (object) array('answer' => 'dog', 'feedback' => '2'),
             (object) array('answer' => 'slow', 'feedback' => '1'),
         );
+
+        return $gapselect;
+    }
+
+    /**
+     * Get data you would get by loading a typical select missing words question.
+     *
+     * @return stdClass as returned by question_bank::load_question_data for this qtype.
+     */
+    public static function get_gapselect_question_data_whitespace_in_placeholders(): stdClass {
+        global $USER;
+
+        $gapselect = new stdClass();
+        $gapselect->id = 0;
+        $gapselect->category = 0;
+        $gapselect->contextid = 0;
+        $gapselect->parent = 0;
+        $gapselect->questiontextformat = FORMAT_HTML;
+        $gapselect->generalfeedbackformat = FORMAT_HTML;
+        $gapselect->defaultmark = 1;
+        $gapselect->penalty = 0.3333333;
+        $gapselect->length = 1;
+        $gapselect->stamp = make_unique_id_code();
+        $gapselect->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
+        $gapselect->versionid = 0;
+        $gapselect->version = 1;
+        $gapselect->questionbankentryid = 0;
+        $gapselect->idnumber = null;
+        $gapselect->timecreated = time();
+        $gapselect->timemodified = time();
+        $gapselect->createdby = $USER->id;
+        $gapselect->modifiedby = $USER->id;
+
+        $gapselect->name = 'Selection from drop down list question';
+        $gapselect->questiontext = 'The [[1 ]] brown [[2  ]] jumped over the [[3   ]] dog.';
+        $gapselect->generalfeedback = 'This sentence uses each letter of the alphabet.';
+        $gapselect->qtype = 'gapselect';
+
+        $gapselect->options = new stdClass();
+        $gapselect->options->shuffleanswers = true;
+
+        test_question_maker::set_standard_combined_feedback_fields($gapselect->options);
+
+        $gapselect->options->answers = [
+            (object) ['answer' => 'quick', 'feedback' => '1'],
+            (object) ['answer' => 'fox', 'feedback' => '2'],
+            (object) ['answer' => 'lazy', 'feedback' => '3'],
+            (object) ['answer' => 'assiduous', 'feedback' => '3'],
+            (object) ['answer' => 'dog', 'feedback' => '2'],
+            (object) ['answer' => 'slow', 'feedback' => '1'],
+        ];
 
         return $gapselect;
     }
@@ -157,6 +208,48 @@ class qtype_gapselect_test_helper extends question_test_helper {
         $gapselect->places = array(1 => 1, 2 => 2, 3 => 3);
         $gapselect->rightchoices = array(1 => 1, 2 => 1, 3 => 1);
         $gapselect->textfragments = array('The ', ' brown ', ' jumped over the ', ' dog.');
+
+        return $gapselect;
+    }
+
+    /**
+     * Get an example gapselect question to use for testing. This examples has one of each item.
+     * @return qtype_gapselect_question
+     */
+    public static function make_gapselect_question_whitespace_in_placeholders(): qtype_gapselect_question {
+        question_bank::load_question_definition_classes('gapselect');
+        $gapselect = new qtype_gapselect_question();
+
+        test_question_maker::initialise_a_question($gapselect);
+
+        $gapselect->name = 'Selection from drop down list question';
+        $gapselect->questiontext = 'The [[1 ]] brown [[2  ]] jumped over the [[3   ]] dog.';
+        $gapselect->generalfeedback = 'This sentence uses each letter of the alphabet.';
+        $gapselect->qtype = question_bank::get_qtype('gapselect');
+        $gapselect->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
+
+        $gapselect->shufflechoices = true;
+
+        test_question_maker::set_standard_combined_feedback_fields($gapselect);
+
+        $gapselect->choices = [
+            1 => [
+                1 => new qtype_gapselect_choice('quick', 1),
+                2 => new qtype_gapselect_choice('slow', 1),
+            ],
+            2 => [
+                1 => new qtype_gapselect_choice('fox', 2),
+                2 => new qtype_gapselect_choice('dog', 2),
+            ],
+            3 => [
+                1 => new qtype_gapselect_choice('lazy', 3),
+                2 => new qtype_gapselect_choice('assiduous', 3),
+            ],
+        ];
+
+        $gapselect->places = [1 => 1, 2 => 2, 3 => 3];
+        $gapselect->rightchoices = [1 => 1, 2 => 1, 3 => 1];
+        $gapselect->textfragments = ['The ', ' brown ', ' jumped over the ', ' dog.'];
 
         return $gapselect;
     }
