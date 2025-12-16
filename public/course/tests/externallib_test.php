@@ -1890,8 +1890,9 @@ final class externallib_test extends \core_external\tests\externallib_testcase {
 
         list($course, $forumcm, $datacm, $pagecm, $labelcm, $urlcm) = $this->prepare_get_course_contents_test();
 
+        $parentsectionposition = 2;
         // Add subsection.
-        $modsubsection = $this->getDataGenerator()->create_module('subsection', ['course' => $course->id, 'section' => 2]);
+        $modsubsection = $this->getDataGenerator()->create_module('subsection', ['course' => $course->id, 'section' => $parentsectionposition]);
 
         // This is needed until MDL-76728 is resolved.
         $PAGE->set_url('/course/view.php', ['id' => $course->id]);
@@ -1901,9 +1902,10 @@ final class externallib_test extends \core_external\tests\externallib_testcase {
 
         $this->assertCount(5, $result); // We have 4 original sections plus the one created by mod_subsection.
 
+        $subsectionposition = $parentsectionposition + 1;
         foreach ($result as $section) {
 
-            if ($section['section'] == 5) { // This is the new section created by modsubsection.
+            if ($section['section'] == $subsectionposition) { // This is the new section created by modsubsection.
                 $this->assertEquals('mod_subsection', $section['component']);
                 $this->assertEquals($modsubsection->id, $section['itemid']);
             } else {
@@ -1911,7 +1913,7 @@ final class externallib_test extends \core_external\tests\externallib_testcase {
                 $this->assertEmpty($section['itemid']);
             }
 
-            if ($section['section'] == 2) { // This is the section where mod_subsection is.
+            if ($section['section'] == $subsectionposition) { // This is the section where mod_subsection is.
                 foreach ($section['modules'] as $module) {
                     if ($module['modname'] == 'subsection') {
                         $this->assertNotEmpty($module['customdata']);

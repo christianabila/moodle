@@ -84,6 +84,8 @@ function subsection_add_instance($moduleinstance, $mform = null) {
             'name' => $moduleinstance->name,
             'visible' => $moduleinstance->visible,
             'availability' => $cmavailability,
+            'parentsectionnum' => $moduleinstance->section,
+            'parentsectionid' => $moduleinstance->sectionid,
         ]
     );
 

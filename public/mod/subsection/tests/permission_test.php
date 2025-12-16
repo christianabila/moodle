@@ -68,7 +68,7 @@ final class permission_test extends advanced_testcase {
 
         if ($isdelegated) {
             $this->getDataGenerator()->create_module('subsection', ['course' => $course->id, 'section' => 1]);
-            $targetsection = $courseformat->get_modinfo()->get_section_info(6);
+            $targetsection = $courseformat->get_modinfo()->get_section_info(2);
         }
 
         $this->setUser($user);

@@ -1222,6 +1222,7 @@ class stateactions {
         // Method "can_add_moduleinfo" called in "prepare_new_moduleinfo_data" will handle the capability checks.
         [, , , , $moduleinfo] = prepare_new_moduleinfo_data($course, $modname, $section->sectionnum);
         $moduleinfo->beforemod = $targetcmid;
+        $moduleinfo->sectionid = $section->id;
         create_module((object) $moduleinfo);
 
         // Adding module affects section structure, and if the module has a delegated section even the course structure.

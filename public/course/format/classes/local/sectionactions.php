@@ -16,6 +16,7 @@
 
 namespace core_courseformat\local;
 
+use mod_subsection\manager;
 use section_info;
 use stdClass;
 use core\event\course_module_updated;
@@ -60,6 +61,34 @@ class sectionactions extends baseactions {
             'timemodified' => time(),
         ];
         $sectionrecord->id = $DB->insert_record("course_sections", $sectionrecord);
+
+        /*
+            Place new subsections right after their parent section
+            or after existing subsections within the parent section!
+        */
+        $issubsection = isset($fields->component) && $fields->component === manager::class::PLUGINNAME;
+        if ($issubsection) {
+            $lastsubsectionposition = $DB->get_record_sql(
+                "SELECT MAX(sections.section) position
+                   FROM {subsection} subsection
+                   JOIN {course_modules} modules
+                        ON modules.instance = subsection.id
+                        AND modules.course = subsection.course
+                        AND modules.course = :courseid
+                   JOIN {course_sections} sections
+                        ON sections.course = modules.course
+                        AND sections.itemid = subsection.id
+                  WHERE modules.section = :parentsectionid",
+                ['courseid' => $this->course->id, 'parentsectionid' => $fields->parentsectionid],
+            );
+
+            $lastsubsectionposition = $lastsubsectionposition->position;
+
+            $position = $fields->parentsectionnum + 1;
+            if (!empty($lastsubsectionposition)) {
+                $position = $lastsubsectionposition->position + 1;
+            }
+        }
 
         // Now move it to the specified position.
         if ($position > 0 && $position <= $lastsection) {
