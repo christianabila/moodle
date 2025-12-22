@@ -25,7 +25,11 @@ namespace auth_oauth2;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\clock;
+use core\di;
 use core\persistent;
+use DateInterval;
+use dml_exception;
 
 /**
  * Class for loading/storing issuer from the DB
@@ -110,4 +114,21 @@ class linked_login extends persistent {
         return $DB->execute($sql, $params);
     }
 
+    /**
+     * Delete expired confirmation tokens.
+     *
+     * @return void
+     * @throws dml_exception
+     */
+    public static function delete_expired_confirmation_tokens(): void {
+        global $DB;
+
+        $sql = "
+        DELETE FROM {" . self::TABLE . "}
+        WHERE confirmtokenexpires <> 0 AND confirmtokenexpires < :expirytime";
+
+        $clock = di::get(clock::class);
+        $expires = $clock->now()->add(new DateInterval(api::CONFIRMTOKEN_EXPIRES))->getTimestamp();
+        $DB->execute($sql, ['expirytime' => $expires]);
+    }
 }
