@@ -77,9 +77,13 @@ if ($ADMIN->fulltree) {
                 get_string('auth_ldap_ldap_encoding', 'auth_ldap'), 'utf-8', PARAM_RAW_TRIMMED));
 
         // Page Size. (Hide if not available).
-        $settings->add(new admin_setting_configtext('auth_ldap/pagesize',
-                get_string('pagesize_key', 'auth_ldap'),
-                get_string('pagesize', 'auth_ldap'), '250', PARAM_INT));
+        $settings->add(new admin_setting_configtext(
+            'auth_ldap/pagesize',
+            get_string('pagesize_key', 'auth_ldap'),
+            get_string('pagesize', 'auth_ldap'),
+            LDAP_DEFAULT_PAGESIZE,
+            PARAM_INT,
+        ));
 
         // Bind settings.
         $settings->add(new admin_setting_heading('auth_ldap/ldapbindsettings',
