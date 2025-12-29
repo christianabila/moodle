@@ -2567,7 +2567,7 @@ class admin_setting_configtext extends admin_setting {
             'size' => $this->size,
             'id' => $this->get_id(),
             'name' => $this->get_full_name(),
-            'value' => $data,
+            'value' => $data ?? $default,
             'forceltr' => $this->get_force_ltr(),
             'readonly' => $this->is_readonly(),
             'data' => $this->datavalues,
