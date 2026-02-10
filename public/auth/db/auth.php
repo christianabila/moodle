@@ -392,7 +392,7 @@ class auth_plugin_db extends auth_plugin_base {
                     $trace->output("User entries to update: ".count($update_users));
 
                     foreach ($update_users as $user) {
-                        if ($this->update_user_record($user->username, $updatekeys, false, (bool) $user->suspended)) {
+                        if ($this->update_user_record($user->username, $updatekeys, true, (bool) $user->suspended)) {
                             $trace->output(get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)), 1);
                         } else {
                             $trace->output(get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id))." - ".get_string('skipped'), 1);
