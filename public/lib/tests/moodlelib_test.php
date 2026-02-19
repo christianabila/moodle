@@ -5881,6 +5881,25 @@ EOT;
     }
 
     /**
+     * Each returned moodle_phpmailer object has an empty MessageID when sending messages in bulk.
+     *
+     * This ensures that each outgoing mail is assigned a unique MessageID.
+     *
+     * @return void
+     * @covers ::get_mailer()
+     */
+    public function test_message_id_is_empty_if_smtp_bulk(): void {
+        $this->resetAfterTest();
+        set_config('smtphosts', 'anyhost');
+        set_config('smtpmaxbulk', 5);
+
+        $mailer = get_mailer();
+        $this->assertEmpty($mailer->MessageID);
+        $mailer->MessageID = "this should be reset next";
+        $this->assertEmpty(get_mailer()->MessageID);
+    }
+
+    /**
      * Data provider for plugin_supports_purpose tests.
      *
      * @return array

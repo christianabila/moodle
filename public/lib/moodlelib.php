@@ -5435,6 +5435,7 @@ function get_mailer($action='get') {
                 $mailer->Body             = "";
                 $mailer->AltBody          = "";
                 $mailer->ConfirmReadingTo = "";
+                $mailer->MessageID        = "";
 
                 $mailer->clearAllRecipients();
                 $mailer->clearReplyTos();
