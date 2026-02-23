@@ -16,6 +16,9 @@
 
 namespace auth_db;
 
+use dml_exception;
+use moodle_exception;
+
 /**
  * External database auth sync tests, this also tests adodb drivers
  * that are matching our four supported Moodle database drivers.
@@ -546,6 +549,55 @@ final class db_test extends \advanced_testcase {
         // Make sure it was the only user deleted.
         $numberdeleted = $DB->count_records('user', array('deleted' => 1, 'auth' => 'db'));
         $this->assertEquals(1, $numberdeleted);
+
+        $this->cleanup_auth_database();
+    }
+
+    /**
+     * \core\event\user_updated event triggered on user updates
+     *
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     * @covers \auth_plugin_db::sync_users
+     */
+    public function test_user_updated_event_triggered(): void {
+        global $DB;
+
+        $this->resetAfterTest(false);
+        $this->preventResetByRollback();
+
+        set_config('enabled_stores', 'logstore_standard', 'tool_log');
+        set_config('buffersize', 0, 'logstore_standard');
+        get_log_manager(true);
+
+        $this->init_auth_database();
+        $auth = get_auth_plugin('db');
+        $auth->db_init();
+        $auth->config->field_updatelocal_email = 'onlogin';
+
+        // Create user on external table.
+        $extdbuser = (object) ['name' => 'u1', 'pass' => 'heslo', 'email' => 'u1@example.com'];
+        $extdbuser->id = $DB->insert_record('auth_db_users', $extdbuser);
+
+        $trace = new \null_progress_trace();
+
+        $auth->sync_users($trace, true);
+
+        $extdbuser = (object) ['id' => $extdbuser->id, 'email' => 'u1_new@example.com'];
+        $DB->update_record('auth_db_users', $extdbuser);
+
+        $auth->sync_users($trace, true);
+
+        $user = $DB->get_record('user', ['email' => $extdbuser->email, 'auth' => 'db']);
+
+        $this->assertTrue($DB->record_exists(
+            'logstore_standard_log',
+            [
+                'eventname' => "\\core\\event\\user_updated",
+                'relateduserid' => $user->id,
+            ],
+        ));
 
         $this->cleanup_auth_database();
     }
