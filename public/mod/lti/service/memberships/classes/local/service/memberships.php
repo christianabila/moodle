@@ -274,7 +274,7 @@ class memberships extends \mod_lti\local\ltiservice\service_base {
                                             'source.value' => format_string($user->idnumber)],
                 'Person.name.full'     => ['type' => 'name',
                                             'member.field' => 'name',
-                                            'source.value' => format_string("{$user->firstname} {$user->lastname}")],
+                                            'source.value' => fullname($user)],
                 'Person.name.given'    => ['type' => 'name',
                                             'member.field' => 'givenName',
                                             'source.value' => format_string($user->firstname)],
