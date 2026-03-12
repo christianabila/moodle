@@ -51,7 +51,7 @@ class qtype_gapselect_edit_form_base extends question_edit_form {
     private $htmltclosetags = '~<\s*/\s*\w+\b[^>]*>~';
 
     /** @var string regex to select text like [[cat]] (including the square brackets). */
-    private $squarebracketsregex = '/\[\[[^]]*?\]\]/';
+    private $squarebracketsregex = '/\[\[\w+]*?\]\]/';
 
     /**
      * Vaidate some input to make sure it does not contain any tags other than
