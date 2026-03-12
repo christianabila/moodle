@@ -4658,6 +4658,13 @@ EOD;
             ['context' => context_course::instance(SITEID), "escape" => false]
         );
 
+        $context->cookiestext = 'cookiesenabledonlysession';
+        $context->cookiestexthelp = 'cookiesenabledonlysession_help';
+        if ($CFG->rememberusername) {
+            $context->cookiestext = 'cookiesenabled';
+            $context->cookiestexthelp = 'cookiesenabled_help_html';
+        }
+
         return $this->render_from_template('core/loginform', $context);
     }
 
