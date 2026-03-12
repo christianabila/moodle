@@ -4770,7 +4770,15 @@ EOD;
      * @return string
      */
     public function render_login(\core_auth\output\login $form) {
+        global $CFG;
         $context = $form->export_for_template($this);
+
+        $context->cookiestext = 'cookiesenabledonlysession';
+        $context->cookiestexthelp = 'cookiesenabledonlysession_help';
+        if ($CFG->rememberusername) {
+            $context->cookiestext = 'cookiesenabled';
+            $context->cookiestexthelp = 'cookiesenabled_help_html';
+        }
 
         return $this->render_from_template('core/loginform', $context);
     }

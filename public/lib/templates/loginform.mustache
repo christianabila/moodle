@@ -43,6 +43,8 @@
     * client - The requesting OAuth2 client, if hasoauth2client is true
       * name - The client's name,
       * description - The client's description, as formatted HTML.
+    * cookiestext: The cookie notice text
+    * cookiestexthelp: Detailed information on the cookie notice
 
     Example context (json):
     {
@@ -68,7 +70,9 @@
         "languagemenu": "Choose language",
         "togglepassword": true,
         "smallscreensonly": true,
-        "hasoauth2client": false
+        "hasoauth2client": false,
+        "cookiestext": "Cookie notice text",
+        "cookiestexthelp": "Cookie notice help text"
     }
 }}
 
@@ -225,8 +229,8 @@
     <div class="login-cookiesnotice text-center">
         <button type="button" class="btn btn-link p-0" {{!
         }} data-modal="alert"{{!
-        }} data-modal-title-str='["cookiesenabled", "core"]' {{!
-        }} data-modal-content-str='["cookiesenabled_help_html", "core"]'{{!
+        }} data-modal-title-str='["{{cookiestext}}", "core"]' {{!
+        }} data-modal-content-str='["{{cookiestexthelp}}", "core"]'{{!
         }}>{{#str}}cookiesnotice{{/str}}</button>
     </div>
 </div>
