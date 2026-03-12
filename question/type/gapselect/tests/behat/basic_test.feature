@@ -153,3 +153,23 @@ Feature: Test all the basic functionality of this question type
       | Question name | Edited question name |
     And I press "id_submitbutton"
     And I should see "Edited question name"
+
+  Scenario: Wrongly formatted placeholders are rejected
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
+
+    # Create a new question.
+    And I add a "Select missing words" question filling the form with:
+      | Question name            | Select missing words 001          |
+      | Question text            | The [[1 ]] [[ 2]] on the [[ 3 ]]. |
+      | General feedback         | The cat sat on the mat.           |
+      | id_choices_0_answer      | cat                               |
+      | id_choices_1_answer      | sat                               |
+      | id_choices_1_choicegroup | 2                                 |
+      | id_choices_2_answer      | mat                               |
+      | id_choices_3_answer      | dog                               |
+      | id_choices_4_answer      | table                             |
+      | id_choices_5_answer      | ran                               |
+      | id_choices_5_choicegroup | 2                                 |
+      | Hint 1                   | First hint                        |
+      | Hint 2                   | Second hint                       |
+    Then I should see "The question text must contain placeholders like [[1]] to show where the missing words go."
