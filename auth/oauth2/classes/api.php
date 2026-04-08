@@ -38,6 +38,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class api {
+    /**
+     * @var string Interval string of the expiration duration
+     * @see https://www.php.net/manual/en/dateinterval.construct.php
+     */
+    public const CONFIRMTOKEN_EXPIRES = 'PT30M';
 
     /**
      * Remove all linked logins that are using issuers that have been deleted.
@@ -164,7 +169,7 @@ class api {
         $record->email = $userinfo['email'];
         $record->confirmtoken = random_string(32);
         $expires = new \DateTime('NOW');
-        $expires->add(new \DateInterval('PT30M'));
+        $expires->add(new \DateInterval(self::CONFIRMTOKEN_EXPIRES));
         $record->confirmtokenexpires = $expires->getTimestamp();
 
         $linkedlogin = new linked_login(0, $record);
