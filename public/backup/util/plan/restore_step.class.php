@@ -53,14 +53,12 @@ abstract class restore_step extends base_step {
      *
      * Note: The policy is to roll date only for configurations and not for user data. see MDL-9367.
      *
-     * @param int $value Time value (seconds since epoch), or empty for nothing
-     * @return int Time value after applying the date offset, or empty for nothing
+     * @param int $value Time value (seconds since epoch)
+     * @return int Time value after applying the date offset
      */
     public function apply_date_offset($value) {
-
-        // Empties don't offset - zeros (int and string), false and nulls return original value.
         if (empty($value)) {
-            return $value;
+            return 0;
         }
 
         static $cache = array();

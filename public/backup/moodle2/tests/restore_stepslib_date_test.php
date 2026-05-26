@@ -444,4 +444,48 @@ final class restore_stepslib_date_test extends \restore_date_testcase {
             $this->assertEquals($dates['originaldate'], $dates['restoredate']);
         }
     }
+
+    /**
+     * Test that grade item locktime and hidden values of 0 remain 0 after a course restore.
+     *
+     * @covers \restore_activity_grades_structure_step::process_grade_item
+     * @covers \restore_step::apply_date_offset
+     * @throws \dml_exception
+     */
+    public function test_grade_item_zero_locktime_and_hidden_date_restore(): void {
+        global $DB;
+        // Create a course with a specific start date and an assignment module.
+        [$course, $assign] = $this->create_course_and_module('assign');
+        // Fetch the grade item automatically created for the assignment.
+        $gradeitem = \grade_item::fetch([
+            'itemtype'     => 'mod',
+            'iteminstance' => $assign->id,
+            'itemmodule'   => 'assign',
+            'courseid'     => $course->id,
+        ]);
+        // Ensure locktime and hidden are both 0 (unset / not hidden).
+        $DB->set_field('grade_items', 'locktime', 0, ['id' => $gradeitem->id]);
+        $DB->set_field('grade_items', 'hidden', 0, ['id' => $gradeitem->id]);
+        // Back up and restore to a course with a new start date.
+        $newcourseid = $this->backup_and_restore($course);
+        // Locate the grade item in the restored course.
+        $assignid = $DB->get_field('assign', 'id', ['course' => $newcourseid]);
+        $newgradeitem = \grade_item::fetch([
+            'itemtype'     => 'mod',
+            'iteminstance' => $assignid,
+            'itemmodule'   => 'assign',
+            'courseid'     => $newcourseid,
+        ]);
+        // Zero values must not be shifted – they indicate "not set", not a real date.
+        $this->assertEquals(
+            0,
+            $newgradeitem->locktime,
+            "locktime of 0 should not be offset on restore."
+        );
+        $this->assertEquals(
+            0,
+            $newgradeitem->hidden,
+            "hidden of 0 should not be offset on restore."
+        );
+    }
 }
