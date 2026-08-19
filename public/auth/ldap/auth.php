@@ -678,6 +678,7 @@ class auth_plugin_ldap extends auth_plugin_base {
      *
      * @param callable|null $updatecallback will do pull in data updates from LDAP if relevant
      * @return bool success
+     * @throws dml_exception
      */
     public function sync_users_update_callback(?callable $updatecallback = null): bool {
         global $CFG, $DB;
@@ -865,10 +866,14 @@ class auth_plugin_ldap extends auth_plugin_base {
 
 /// User Updates - time-consuming (optional)
         if ($updatecallback && $updatekeys = $this->get_profile_keys()) { // Run updates only if relevant.
-            $users = $DB->get_records_sql('SELECT u.username, u.id
-                                             FROM {user} u
-                                            WHERE u.deleted = 0 AND u.auth = ? AND u.mnethostid = ?',
-                                          array($this->authtype, $CFG->mnet_localhost_id));
+            $users = $DB->get_records_sql(
+                'SELECT u.username, u.id
+                   FROM {user} u
+                  WHERE u.deleted = 0 AND u.auth = ? AND u.mnethostid = ?',
+                [$this->authtype, $CFG->mnet_localhost_id],
+            );
+            $users = array_values($users);
+
             if (!empty($users)) {
                 // Update users in chunks as specified in sync_updateuserchunk.
                 if (!empty($this->config->sync_updateuserchunk)) {
