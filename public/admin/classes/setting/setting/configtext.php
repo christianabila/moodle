@@ -129,7 +129,7 @@ class configtext extends \core_admin\setting {
             'size' => $this->size,
             'id' => $this->get_id(),
             'name' => $this->get_full_name(),
-            'value' => $data,
+            'value' => $data ?? $default,
             'forceltr' => $this->get_force_ltr(),
             'readonly' => $this->is_readonly(),
             'data' => $this->datavalues,
