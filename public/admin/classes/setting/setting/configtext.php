@@ -71,8 +71,7 @@ class configtext extends \core_admin\setting {
     #[\Override]
     public function write_setting($data) {
         if ($this->paramtype === PARAM_INT && $data === '') {
-            // Do not complain if '' used instead of 0.
-            $data = 0;
+            $data = $this->get_defaultsetting();
         }
         // The data value is a string.
         $validated = $this->validate($data);
