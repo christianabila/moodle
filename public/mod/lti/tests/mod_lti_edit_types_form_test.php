@@ -23,6 +23,8 @@
  * @since      Moodle 4.3
  */
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/course_categories_trait.php');
@@ -35,6 +37,7 @@ require_once(__DIR__ . '/course_categories_trait.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      Moodle 4.3
  */
+#[CoversClass(mod_lti_edit_types_form::class)]
 final class mod_lti_edit_types_form_test extends \advanced_testcase {
     // There are shared helpers for these tests in the helper course_categories_trait.
     use \mod_lti_course_categories_trait;
@@ -104,4 +107,33 @@ final class mod_lti_edit_types_form_test extends \advanced_testcase {
         $this->assertEquals($categoryarray, $coursecategoriesarray);
     }
 
+    /**
+     * Tests the public keyset field of the LTI 1.3 tool form is validated as a URL.
+     */
+    public function test_publickeyset_uses_param_url(): void {
+        global $CFG;
+
+        require_once($CFG->dirroot . '/mod/lti/tests/fixtures/test_edit_form.php');
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Malformed keyset URLs (e.g. with trailing whitespace) are cleaned to an empty value on save.
+        $badform = new test_edit_form(null);
+        $badform->get_quick_form()->updateSubmission([
+            'lti_typename' => 'Test tool',
+            'lti_toolurl' => 'https://example.com/launch',
+            'lti_publickeyset' => 'https://example.com  ',
+        ], []);
+        $this->assertSame('', $badform->get_data()->lti_publickeyset);
+
+        // A well-formed keyset URL is preserved unchanged.
+        $goodform = new test_edit_form(null);
+        $goodform->get_quick_form()->updateSubmission([
+            'lti_typename' => 'Test tool',
+            'lti_toolurl' => 'https://example.com/launch',
+            'lti_publickeyset' => 'https://example.com/keys',
+        ], []);
+        $this->assertSame('https://example.com/keys', $goodform->get_data()->lti_publickeyset);
+    }
 }
