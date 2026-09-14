@@ -118,11 +118,13 @@ class issuer extends persistent {
         if ($this->type && $this->type == 'nextcloud') {
             $mform->addRule('baseurl', null, 'required', null, 'client');
         }
+        $mform->setType('baseurl', PARAM_URL);
 
         // Image.
         $mform->addElement('text', 'image', get_string('issuerimage', 'tool_oauth2'), 'maxlength="1024"');
         $mform->addRule('image', get_string('maximumchars', '', 1024), 'maxlength', 1024, 'client');
         $mform->addHelpButton('image', 'issuername', 'tool_oauth2');
+        $mform->setType('image', PARAM_URL);
 
         // Show on login page.
         $options = [
