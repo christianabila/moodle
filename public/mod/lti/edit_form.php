@@ -147,7 +147,7 @@ class mod_lti_edit_types_form extends moodleform {
             $mform->setForceLtr('lti_publickey');
 
             $mform->addElement('text', 'lti_publickeyset', get_string('publickeyset', 'lti'), ['size' => '64']);
-            $mform->setType('lti_publickeyset', PARAM_TEXT);
+            $mform->setType('lti_publickeyset', PARAM_URL);
             $mform->addHelpButton('lti_publickeyset', 'publickeyset', 'lti');
             $mform->hideIf('lti_publickeyset', 'lti_keytype', 'neq', LTI_JWK_KEYSET);
             $mform->hideIf('lti_publickeyset', 'lti_ltiversion', 'neq', LTI_VERSION_1P3);
