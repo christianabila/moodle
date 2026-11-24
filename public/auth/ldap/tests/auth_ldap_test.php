@@ -370,6 +370,27 @@ final class auth_ldap_test extends \advanced_testcase {
         // After updating in chunks of '1', we should have counted more than one update.
         $this->assertGreaterThan(1, $count);
 
+        // Let's test syncing users in chunks of '0' (=all users at once).
+        set_config('field_updatelocal_email', 'onlogin', 'auth_ldap');
+        set_config('sync_updateuserchunk', 0, 'auth_ldap');
+
+        /** @var auth_plugin_ldap $auth */
+        $auth = \core\di::get(\core\authentication::class)->get_plugin('ldap');
+
+        $count = 0;
+        ob_start();
+        $auth->sync_users_update_callback(function ($users, $updatekeys) use (&$count) {
+            $asynctask = new asynchronous_sync_task();
+            $asynctask->set_custom_data([
+                'users' => $users,
+                'updatekeys' => $updatekeys,
+            ]);
+            $count++;
+        });
+        ob_end_clean();
+        // After updating in chunks of '0', we should have counted one update and no error occurred.
+        $this->assertEquals(1, $count);
+
         ob_start();
         \core\cron::setup_user();
         $cron = new sync_task();
