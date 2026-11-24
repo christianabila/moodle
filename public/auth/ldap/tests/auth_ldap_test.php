@@ -34,6 +34,7 @@ namespace auth_ldap;
  */
 
 use auth_plugin_ldap;
+use moodle_exception;
 use auth_ldap\task\{
     sync_task,
     asynchronous_sync_task,
@@ -84,6 +85,7 @@ final class auth_ldap_test extends \advanced_testcase {
      * @dataProvider auth_ldap_provider
      * @param int $pagesize Value to be configured in settings controlling page size.
      * @param int $subcontext Value to be configured in settings controlling searching in subcontexts.
+     * @throws moodle_exception
      */
     public function test_auth_ldap(int $pagesize, int $subcontext): void {
         global $DB;
@@ -369,6 +371,27 @@ final class auth_ldap_test extends \advanced_testcase {
         ob_end_clean();
         // After updating in chunks of '1', we should have counted more than one update.
         $this->assertGreaterThan(1, $count);
+
+        // Let's test syncing users in chunks of '0' (=all users at once).
+        set_config('field_updatelocal_email', 'onlogin', 'auth_ldap');
+        set_config('sync_updateuserchunk', 0, 'auth_ldap');
+
+        /** @var auth_plugin_ldap $auth */
+        $auth = get_auth_plugin('ldap');
+
+        $count = 0;
+        ob_start();
+        $auth->sync_users_update_callback(function ($users, $updatekeys) use (&$count) {
+            $asynctask = new asynchronous_sync_task();
+            $asynctask->set_custom_data([
+                'users' => $users,
+                'updatekeys' => $updatekeys,
+            ]);
+            $count++;
+        });
+        ob_end_clean();
+        // After updating in chunks of '0', we should have counted one update and no error occurred.
+        $this->assertEquals(1, $count);
 
         ob_start();
         \core\cron::setup_user();
